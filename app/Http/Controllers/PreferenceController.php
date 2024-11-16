@@ -185,17 +185,6 @@ class PreferenceController extends Controller
      *     )
      * )
      * 
-     * @OA\Schema(
-     *     schema="Article",
-     *     type="object",
-     *     @OA\Property(property="id", type="integer", description="The article ID"),
-     *     @OA\Property(property="title", type="string", description="The article title"),
-     *     @OA\Property(property="content", type="string", description="The main content of the article"),
-     *     @OA\Property(property="category", type="string", description="Category of the article"),
-     *     @OA\Property(property="source", type="string", description="Source of the article"),
-     *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation timestamp"),
-     *     @OA\Property(property="updated_at", type="string", format="date-time", description="Update timestamp")
-     * )
      */
     public function personalizedFeed()
     {
