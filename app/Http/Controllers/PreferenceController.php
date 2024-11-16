@@ -14,6 +14,57 @@ class PreferenceController extends Controller
 {
     /**
      * Store or update user preferences.
+     *
+     * @OA\Post(
+     *     path="/api/preferences",
+     *     tags={"User Preferences"},
+     *     summary="Set or update user preferences",
+     *     description="Allows a user to set or update their preferred news sources, categories, and authors.",
+     *     security={{"bearerAuth": {}}},
+     *     operationId="setPreferences",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"preferred_sources", "preferred_categories"},
+     *             @OA\Property(property="preferred_sources", type="array", @OA\Items(type="string"), example={"9to5google.com", "Blizzard.com"}),
+     *             @OA\Property(property="preferred_categories", type="array", @OA\Items(type="string"), example={"general", "technology"}),
+     *             @OA\Property(property="preferred_authors", type="array", @OA\Items(type="string"), example={"NYT", "NewsAPI"})
+     *         )
+     *     ),
+     * @OA\Response(
+     *     response=200,
+     *     description="preference stored successfully",
+     *     @OA\JsonContent(
+     *         @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="message", type="string", example="preference stored successfully"),
+     *         @OA\Property(
+     *             property="data",
+     *             type="object",
+     *             @OA\Property(property="preferred_sources", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="preferred_categories", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="preferred_authors", type="array", @OA\Items(type="string"))
+     *         )
+     *     )
+     * ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="Validation error"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="An error occurred"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     )
+     * )
      */
     public function store(PreferenceRequest $request)
     {
@@ -36,7 +87,50 @@ class PreferenceController extends Controller
 
     /**
      * Retrieve the authenticated user's preferences.
+     * @OA\Get(
+     *     path="/api/preferences",
+     *     tags={"User Preferences"},
+     *     summary="Retrieve user preferences",
+     *     description="Fetches the user's saved preferences for news sources, categories, and authors.",
+     *     security={{"bearerAuth": {}}},
+     *     operationId="getPreferences",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Retrieve User preferences",
+     *         @OA\JsonContent(
+     *           @OA\Property(property="status", type="string", example="success"),
+     *         @OA\Property(property="message", type="string", example="User preferences retrieved successfully"),
+     *         @OA\Property(
+     *             property="data",
+     *             type="object",
+     *             @OA\Property(property="preferred_sources", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="preferred_categories", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="preferred_authors", type="array", @OA\Items(type="string"))
+     *         )
+     *          
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Preferences not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="Preferences not found"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="An error occurred"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     )
+     * )
      */
+
     public function show()
     {
         try {
@@ -52,6 +146,56 @@ class PreferenceController extends Controller
 
     /**
      * Fetch a personalized news feed based on user preferences.
+     *
+     * @OA\Get(
+     *     path="/api/personalized-feed",
+     *     tags={"User Preferences"},
+     *     summary="Fetch personalized news feed",
+     *     description="Generates a personalized news feed based on the user's preferences for sources, categories, and authors.",
+     *     security={{"bearerAuth": {}}},
+     *     operationId="getPersonalizedFeed",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Fetch personalized news feed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Personalized news feed retrieved successfully"),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Article")),
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Preferences not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="No preferences found for the user"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="failed"),
+     *             @OA\Property(property="message", type="string", example="An error occurred"),
+     *             @OA\Property(property="data", nullable=true, example=null)
+     *         )
+     *     )
+     * )
+     * 
+     * @OA\Schema(
+     *     schema="Article",
+     *     type="object",
+     *     @OA\Property(property="id", type="integer", description="The article ID"),
+     *     @OA\Property(property="title", type="string", description="The article title"),
+     *     @OA\Property(property="content", type="string", description="The main content of the article"),
+     *     @OA\Property(property="category", type="string", description="Category of the article"),
+     *     @OA\Property(property="source", type="string", description="Source of the article"),
+     *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation timestamp"),
+     *     @OA\Property(property="updated_at", type="string", format="date-time", description="Update timestamp")
+     * )
      */
     public function personalizedFeed()
     {
@@ -59,7 +203,7 @@ class PreferenceController extends Controller
             $userPreference = Auth::user()->preference;
 
             if (!$userPreference) {
-                return ResponseHelper::error('No preferences found for the user.', 404);
+                return ResponseHelper::error('No preferences found for the user', 404);
             }
 
             // Query the articles based on user preferences
