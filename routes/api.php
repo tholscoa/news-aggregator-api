@@ -13,3 +13,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/initiate/password/reset', [AuthController::class, 'initiateResetPassword'])->name('password.email');
 // Route for password reset
 Route::post('/reset/password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Route for logging out (requires authentication)
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
