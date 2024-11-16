@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -18,4 +19,8 @@ Route::post('/reset/password', [AuthController::class, 'resetPassword'])->name('
 Route::middleware('auth:sanctum')->group(function () {
     // Route for logging out (requires authentication)
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Route group for article management
+    Route::get('/articles', [ArticleController::class, 'index']);      // List and filter articles
+    Route::get('/articles/{id}', [ArticleController::class, 'show']);  // Retrieve a single article
 });
