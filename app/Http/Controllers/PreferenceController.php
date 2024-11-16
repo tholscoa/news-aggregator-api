@@ -2,35 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
+use App\Http\Requests\PreferenceRequest;
 use App\Models\Preference;
 use App\Models\Article;
-use Illuminate\Http\Request;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PreferenceController extends Controller
 {
     /**
      * Store or update user preferences.
      */
-    public function store(Request $request)
+    public function store(PreferenceRequest $request)
     {
-        $validatedData = $request->validate([
-            'preferred_sources' => 'nullable|array',
-            'preferred_categories' => 'nullable|array',
-            'preferred_authors' => 'nullable|array',
-        ]);
-
-        // Retrieve or create preference record for the authenticated user
-        $preference = Preference::updateOrCreate(
-            ['user_id' => Auth::id()],
-            [
-                'preferred_sources' => $validatedData['preferred_sources'] ?? [],
-                'preferred_categories' => $validatedData['preferred_categories'] ?? [],
-                'preferred_authors' => $validatedData['preferred_authors'] ?? [],
-            ]
-        );
-
-        return response()->json(['message' => 'Preferences saved successfully', 'preference' => $preference], 200);
+        try {
+            // update or create preference record for the authenticated user
+            $preference = Preference::updateOrCreate(
+                ['user_id' => Auth::id()],
+                [
+                    'preferred_sources' => $request->preferred_sources ?? [],
+                    'preferred_categories' => $request->preferred_categories ?? [],
+                    'preferred_authors' => $request->preferred_authors ?? [],
+                ]
+            );
+            return ResponseHelper::success($preference, "preference stored successfully");
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return ResponseHelper::error();
+        }
     }
 
     /**
@@ -38,9 +39,14 @@ class PreferenceController extends Controller
      */
     public function show()
     {
-        $preference = Auth::user()->preference;
+        try {
+            $preference = Auth::user()->preference;
 
-        return response()->json(['preference' => $preference], 200);
+            return ResponseHelper::success($preference, "preference successfully retrieved", 200);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return ResponseHelper::error();
+        }
     }
 
 
@@ -49,25 +55,30 @@ class PreferenceController extends Controller
      */
     public function personalizedFeed()
     {
-        $userPreference = Auth::user()->preference;
+        try {
+            $userPreference = Auth::user()->preference;
 
-        if (!$userPreference) {
-            return response()->json(['message' => 'No preferences found for the user.'], 404);
+            if (!$userPreference) {
+                return ResponseHelper::error('No preferences found for the user.', 404);
+            }
+
+            // Query the articles based on user preferences
+            $articles = Article::query()
+                ->when($userPreference->preferred_sources, function ($query, $sources) {
+                    $query->whereIn('source', $sources);
+                })
+                ->when($userPreference->preferred_categories, function ($query, $categories) {
+                    $query->whereIn('category', $categories);
+                })
+                ->when($userPreference->preferred_authors, function ($query, $authors) {
+                    $query->whereIn('author', $authors);
+                })
+                ->paginate(10);
+
+            return ResponseHelper::success($articles, 'personalized feeds successfully fetched');
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return ResponseHelper::error();
         }
-
-        // Query the articles based on user preferences
-        $articles = Article::query()
-            ->when($userPreference->preferred_sources, function ($query, $sources) {
-                $query->whereIn('source', $sources);
-            })
-            ->when($userPreference->preferred_categories, function ($query, $categories) {
-                $query->whereIn('category', $categories);
-            })
-            ->when($userPreference->preferred_authors, function ($query, $authors) {
-                $query->whereIn('author', $authors);
-            })
-            ->paginate(10);
-
-        return response()->json($articles);
     }
 }
