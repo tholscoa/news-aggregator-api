@@ -83,6 +83,7 @@ class AuthController extends Controller
      */
     public function register(RegistrationRequest $request)
     {
+
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -90,6 +91,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
+            // Log::info("====>" . json_encode($user));
             return ResponseHelper::success($user, "Successful registration", 200); // Ensure this returns a response
 
         } catch (Exception $e) {
