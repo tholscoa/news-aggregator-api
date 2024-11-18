@@ -8,8 +8,8 @@
             -   Docker Compose
 
    ## Clone the Repository and the working directory to 'news-aggregator-api' by running the below   two commands:
-        1. git clone https://github.com/tholscoa/news-aggregator-api.git
-        2. cd news-aggregator-api
+        git clone https://github.com/tholscoa/news-aggregator-api.git
+        cd news-aggregator-api
 
    ## Setup the Environment by running the below command:
         cp .env.example .env
