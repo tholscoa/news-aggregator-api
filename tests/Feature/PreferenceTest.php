@@ -19,7 +19,7 @@ class PreferenceTest extends TestCase
 
         $this->actingAs($user)
             ->postJson('/api/preferences', [
-                'preferred_sources' => ['source1', 'source2'],
+                'preferred_sources' => ['NYT', 'NewsAPI'],
                 'preferred_categories' => ['sports', 'technology'],
             ])
             ->assertStatus(200)
