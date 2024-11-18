@@ -15,9 +15,9 @@
         cp .env.example .env
 
    ## Deploy the Application and DB using Docker Compose by Running the command in each steps below:
-        docker-compose exec app composer install #just incase this was not successful during build
         docker-compose build  #Build the images
         docker-compose up -d #Start the Containers
+        docker-compose exec app composer install #just incase this was not successful during build
         docker-compose exec app php artisan migrate #Run migrations
         docker-compose exec app php artisan db:seed #Run Seed
         docker-compose exec app php artisan l5-swagger:generate #Generate API documentation 
